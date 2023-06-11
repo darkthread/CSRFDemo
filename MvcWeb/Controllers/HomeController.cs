@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Helpers;
 using System.Web.Mvc;
 
 namespace MvcWeb.Controllers
@@ -23,6 +24,8 @@ namespace MvcWeb.Controllers
             return View();
         }
 
+
+
         [HttpPost]
         public ActionResult Query()
         {
@@ -33,8 +36,17 @@ namespace MvcWeb.Controllers
         }
 
         [HttpPost]
-        public ActionResult Register(string eventName)
+        public ActionResult Register(string eventName, string token)
         {
+            try
+            {
+                var p = token.Split(':');
+                AntiForgery.Validate(p[0], p[1]);
+            }
+            catch
+            {
+                return Content("Invalid Token");
+            }
             _registrations.Enqueue(new RegistrationEntry
             {
                 RegTime = DateTime.Now,

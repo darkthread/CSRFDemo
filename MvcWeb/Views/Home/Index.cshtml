@@ -19,36 +19,45 @@
     </style>
 </head>
 <body>
-    <div id="app">
-        <table class="op">
-            <tr>
-                <td class="hdr">活動</td>
-                <td>
-                    <select v-model="EventName">
-                        <option value="上刀山">刀山歷險</option>
-                        <option value="下油鍋">油鍋體驗</option>
-                        <option value="寫程式">程式開發</option>
-                    </select>
-                    <label>
-                        <input type="checkbox" v-model="Confirmed"/>
-                        我已閱讀活動規則
-                    </label>
-                </td>
-                <td>
-                    <button :disabled="!Confirmed" v-on:click="Submit">
-                        送出申請
-                    </button>
-                </td>
-            </tr>
-        </table>
-        <button v-on:click="Query">重新整理</button>
-        <span class="msg">{{Msg}}</span>
-        <div class="list">
-            <div v-for="e in Entries">{{e}}</div>
-        </div>
-
+<div id="app">
+    <table class="op">
+        <tr>
+            <td class="hdr">活動</td>
+            <td>
+                <select v-model="EventName">
+                    <option value="上刀山">刀山歷險</option>
+                    <option value="下油鍋">油鍋體驗</option>
+                    <option value="寫程式">程式開發</option>
+                </select>
+                <label>
+                    <input type="checkbox" v-model="Confirmed"/>
+                    我已閱讀活動規則
+                </label>
+            </td>
+            <td>
+                <button :disabled="!Confirmed" v-on:click="Submit">
+                    送出申請
+                </button>
+            </td>
+        </tr>
+    </table>
+    <button v-on:click="Query">重新整理</button>
+    <span class="msg">{{Msg}}</span>
+    <div class="list">
+        <div v-for="e in Entries">{{e}}</div>
     </div>
+
+</div>
+
 <script>
+    @functions{
+        public string TokenValue()
+        {
+            string cookieToken, formToken;
+            AntiForgery.GetTokens(null, out cookieToken, out formToken);
+            return cookieToken + ":" + formToken;
+        }
+    }
     var app = Vue.createApp({
         data() {
             return {
@@ -70,7 +79,10 @@
                 fetch('@Url.Action("Register")', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ EventName: this.EventName })
+                    body: JSON.stringify({
+                        EventName: this.EventName,
+                        Token: '@TokenValue()' 
+                    })
                 }).then(response => response.text())
                     .then(msg => { self.ShowMsg(msg); self.Query(); })
                     .catch(err => self.ShowMsg('發生錯誤'));
@@ -86,6 +98,6 @@
         }
     });
     var vm = app.mount('#app');
-    </script>
+</script>
 </body>
 </html>
