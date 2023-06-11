@@ -1,0 +1,91 @@
+﻿
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>登記模擬</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+        html,body { font-size: 10pt; }
+        table { border-collapse: collapse; margin-bottom: 12px; }
+        td { padding: 3px 6px; border: 1px solid gray; }
+        td.hdr { background-color: #eee; width: 50px; text-align: right; }
+        .list { padding: 10px; margin-top: 10px; border: 1px solid gray;  }
+        .msg { margin-left: 12px; color: cadetblue; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <table class="op">
+            <tr>
+                <td class="hdr">活動</td>
+                <td>
+                    <select v-model="EventName">
+                        <option value="上刀山">刀山歷險</option>
+                        <option value="下油鍋">油鍋體驗</option>
+                        <option value="寫程式">程式開發</option>
+                    </select>
+                    <label>
+                        <input type="checkbox" v-model="Confirmed"/>
+                        我已閱讀活動規則
+                    </label>
+                </td>
+                <td>
+                    <button :disabled="!Confirmed" v-on:click="Submit">
+                        送出申請
+                    </button>
+                </td>
+            </tr>
+        </table>
+        <button v-on:click="Query">重新整理</button>
+        <span class="msg">{{Msg}}</span>
+        <div class="list">
+            <div v-for="e in Entries">{{e}}</div>
+        </div>
+
+    </div>
+<script>
+    var app = Vue.createApp({
+        data() {
+            return {
+                EventName: '上刀山',
+                Confirmed: false,
+                Entries: [],
+                Msg: ''
+            };
+        },
+        methods: {
+            ShowMsg(msg) {
+                this.Msg = msg;
+                const self = this;
+                setTimeout(() => self.Msg = '', 3000);
+            },
+            Submit() {
+                const self = this;
+                self.Msg = "傳送中";
+                fetch('@Url.Action("Register")', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ EventName: this.EventName })
+                }).then(response => response.text())
+                    .then(msg => { self.ShowMsg(msg); self.Query(); })
+                    .catch(err => self.ShowMsg('發生錯誤'));
+            },
+            Query() {
+                fetch('@Url.Action("Query")', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => this.Entries = data);
+            }
+        },
+        mounted() {
+            this.Query();
+        }
+    });
+    var vm = app.mount('#app');
+    </script>
+</body>
+</html>
