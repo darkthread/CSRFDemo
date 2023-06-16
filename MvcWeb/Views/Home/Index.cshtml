@@ -78,10 +78,12 @@
                 self.Msg = "傳送中";
                 fetch('@Url.Action("Register")', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '@TokenValue()'
+                    },
                     body: JSON.stringify({
-                        EventName: this.EventName,
-                        Token: '@TokenValue()' 
+                        EventName: this.EventName
                     })
                 }).then(response => response.text())
                     .then(msg => { self.ShowMsg(msg); self.Query(); })

@@ -36,10 +36,12 @@ namespace MvcWeb.Controllers
         }
 
         [HttpPost]
-        public ActionResult Register(string eventName, string token)
+        public ActionResult Register(string eventName)
         {
             try
             {
+                // TODO: 可改寫成 IAuthorizationFilter 方便套用
+                var token = Request.Headers["X-CSRF-TOKEN"];
                 var p = token.Split(':');
                 AntiForgery.Validate(p[0], p[1]);
             }
